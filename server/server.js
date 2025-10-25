@@ -44,7 +44,7 @@ const io = new Server(server, {
 // 🧩 CONNECT TO MONGODB
 // -----------------------------
 mongoose
-  .connect(MONGO_URI, {
+  .connect(MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -10,16 +11,16 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-// -----------------------------
-// 🔧 CONFIGURATION
-// -----------------------------
+
+// CONFIGURATION
+
 const PORT = process.env.PORT || 4000;
-const MONGODB_URI = process.env.MONGODB_URI ;
+const MONGODB_URI = process.env.MONGO_URI;
+console.log("MongoDB URI:", MONGODB_URI);
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
-// -----------------------------
-// 🚀 INITIALIZE APP + SOCKET.IO
-// -----------------------------
+
+
 const app = express();
 
 // FIXED CORS Configuration
@@ -40,9 +41,8 @@ const io = new Server(server, {
   } 
 });
 
-// -----------------------------
-// 🧩 CONNECT TO MONGODB
-// -----------------------------
+// CONNECT MONGODB
+
 mongoose
   .connect(MONGODB_URI, {
     useNewUrlParser: true,
@@ -54,9 +54,9 @@ mongoose
     process.exit(1);
   });
 
-// -----------------------------
-// 🗃️ DEFINE SCHEMAS
-// -----------------------------
+
+// DEFINE SCHEMAS
+
 const userSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -81,9 +81,9 @@ const videoSchema = new mongoose.Schema({
 const User = mongoose.model("User", userSchema);
 const Video = mongoose.model("Video", videoSchema);
 
-// -----------------------------
-// 🔐 AUTHENTICATION MIDDLEWARE
-// -----------------------------
+
+//  AUTHENTICATION MIDDLEWARE
+
 const authenticateToken = (req, res, next) => {
   // Skip authentication for OPTIONS preflight requests
   if (req.method === 'OPTIONS') {
@@ -106,9 +106,9 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// -----------------------------
-// 💾 MULTER STORAGE CONFIG
-// -----------------------------
+
+//  MULTER STORAGE CONFIG
+
 const uploadDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
@@ -121,9 +121,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// -----------------------------
+
 // 🔌 SOCKET.IO CONNECTION HANDLER
-// -----------------------------
+
 io.on("connection", (socket) => {
   console.log("🟢 Client connected:", socket.id);
 
@@ -138,9 +138,9 @@ io.on("connection", (socket) => {
   });
 });
 
-// -----------------------------
-// 👥 AUTHENTICATION ENDPOINTS
-// -----------------------------
+
+//  AUTHENTICATION ENDPOINTS
+
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, password, name } = req.body;
@@ -216,9 +216,9 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// -----------------------------
-// 📤 UPLOAD ENDPOINT (PROTECTED)
-// -----------------------------
+
+//  UPLOAD ENDPOINT (PROTECTED)
+
 app.post("/api/videos", authenticateToken, upload.single("video"), async (req, res) => {
   try {
     if (!req.file) {
@@ -248,9 +248,8 @@ app.post("/api/videos", authenticateToken, upload.single("video"), async (req, r
   }
 });
 
-// -----------------------------
-// 🎥 VIDEO STREAMING ENDPOINT (FIXED)
-// -----------------------------
+//  VIDEO STREAMING ENDPOINT (FIXED)
+
 app.get("/api/videos/:filename/stream", authenticateToken, async (req, res) => {
   try {
     const { filename } = req.params;
@@ -309,9 +308,9 @@ app.get("/api/videos/:filename/stream", authenticateToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 📄 FETCH USER VIDEOS ENDPOINT (PROTECTED)
-// -----------------------------
+
+//  FETCH USER VIDEOS ENDPOINT (PROTECTED)
+
 app.get("/api/videos", authenticateToken, async (req, res) => {
   try {
     const videos = await Video.find({ userId: req.user.userId }).sort({ createdAt: -1 });
@@ -322,14 +321,13 @@ app.get("/api/videos", authenticateToken, async (req, res) => {
   }
 });
 
-// -----------------------------
-// 🌐 SERVE UPLOADED FILES STATICALLY (PROTECTED)
-// -----------------------------
+
+//  SERVE UPLOADED FILES STATICALLY (PROTECTED)
+
 app.use("/uploads", authenticateToken, express.static(uploadDir));
 
-// -----------------------------
-// ⚙️ SIMULATED PROCESSING LOGIC
-// -----------------------------
+//  SIMULATED PROCESSING LOGIC
+
 async function simulateProcessing(videoId, userId) {
   io.to(videoId).emit("processing:update", {
     videoId,
@@ -374,9 +372,9 @@ async function simulateProcessing(videoId, userId) {
   }, 600);
 }
 
-// -----------------------------
-// 🚀 START SERVER
-// -----------------------------
+
+//  START SERVER
+
 server.listen(PORT, () => {
   console.log(`🚀 Server running at: http://localhost:${PORT}`);
 });

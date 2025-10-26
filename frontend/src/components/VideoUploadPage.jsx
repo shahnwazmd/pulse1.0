@@ -324,7 +324,7 @@ import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
 
-/** CHANGE THIS to point to your server */
+
 const SERVER_BASE = "http://localhost:4000";
 const UPLOAD_URL = `${SERVER_BASE}/api/videos`;
 const SOCKET_URL = SERVER_BASE;
@@ -355,7 +355,7 @@ export default function VideoUploadPage() {
 //   body: formData,
 // });
 
-  // connect socket once
+  // connect socket 
   useEffect(() => {
     const s = io(SOCKET_URL, { transports: ["websocket", "polling"] });
     setSocket(s);
@@ -367,7 +367,7 @@ export default function VideoUploadPage() {
   useEffect(() => {
     if (!socket) return;
 
-    // handle processing updates from server
+    // handle updates from server
     const handler = (payload) => {
       const { videoId, stage, percent } = payload;
       setFiles(prev => prev.map(f => {
@@ -398,7 +398,7 @@ export default function VideoUploadPage() {
         progress: 0,
         controller: null,
         error: null,
-        videoId: null, // server-assigned id after upload
+        videoId: null, // server id after upload
         processingStage: null,
         processingPercent: 0,
       };
@@ -593,7 +593,7 @@ export default function VideoUploadPage() {
                   <div style={{ marginLeft: 8, minWidth: 50 }}>{f.progress}%</div>
                 </div>
 
-                {/* realtime processing info */}
+                {/* realtime info */}
                 {f.videoId && (
                   <div style={{ marginTop: 8 }}>
                     <div style={{ fontSize: 13 }}>
